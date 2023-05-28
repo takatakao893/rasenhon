@@ -1,91 +1,68 @@
-#include<cstdio>
-#include<cstdlib>
-#include<cstring>
+#include<iostream>
+#include<string>
+#include<memory>
+using namespace std;
 
-struct Node {
-    int key;
-    Node *next, *prev;
+struct Node{
+    unsigned int key = 0;
+    shared_ptr<Node> prev = nullptr;
+    shared_ptr<Node> next = nullptr;
 };
 
-Node *nil;
-
-Node* listSearch(int key){
-    Node *cur = nil->next; 
-    while(cur != nil && cur->key != key){
+void print_nodes(const shared_ptr<Node>& top){
+    auto cur = top->next;
+    while (cur->next){
+        cout << cur->key << " ";
         cur = cur->next;
     }
-    return cur;
-}
-
-void init() {
-    nil = (Node *)malloc(sizeof(Node));
-    nil->next = nil;
-    nil->prev = nil;
-}
-
-void printList(){
-    Node *cur = nil->next;
-    int isf = 0;
-    while(1) {
-        if(cur == nil) break;
-        if(isf++ > 0) printf(" ");
-        printf("%d", cur->key);
-        cur = cur->next;
-    }
-    printf("\n");
-}
-
-void deleteNode(Node *t){
-    if (t == nil) return;
-    t->prev->next = t->next;
-    t->next->prev = t->prev;
-    free(t);
-}
-
-void deleteFirst(){
-    deleteNode(nil->next);
-}
-
-void deleteLast(){
-    deleteNode(nil->prev);
-}
-
-void deleteKey(int key){
-    deleteNode(listSearch(key));
-}
-
-void insert(int key){
-    Node *x = (Node *)malloc(sizeof(Node));
-    x->key = key;
-    x->next = nil->next;
-    nil->next->prev = x;
-    nil->next = x;
-    x->prev = nil;
+    cout << cur->key << endl;
 }
 
 int main(){
-    int key, n, i;
-    int size = 0;
-    char com[20];
-    int np,nd;
-    np=nd=0;
-    scanf("%d", &n);
-    init();
-    for(i = 0; i<n; i++){
-        scanf("%s%d", com, &key);
-        if (com[0]=='i') { insert(key); np++; size++;}
-        else if(com[0]=='d'){
-            if(strlen(com) > 6){
-                if(com[6]=='F') deleteFirst();
-                else if(com[6]=='L') deleteLast();
-            }else{
-                deleteKey(key); nd++;
+    unsigned int n;
+    cin >> n;
+    const auto top = make_shared<Node>();
+    shared_ptr<Node> last = nullptr;
+    for(unsigned int i=0; i<n; i++){
+        string command;
+        cin >> command;
+        if(command == "insert"){
+            unsigned int key;
+            cin >> key;
+            auto node = make_shared<Node>();
+            node->key = key;
+            node->prev = top;
+            node->next = top->next;
+            if (node->next) {node->next->prev = node; }
+            else{ last = node;}
+            top->next = node;
+        }else if(command == "delete"){
+            unsigned int key;
+            cin >> key;
+            auto tmp = top->next;
+            while(tmp){
+                if(tmp->key == key){
+                    tmp->prev->next = tmp->next;
+                    if(tmp->next) tmp->next->prev = tmp->prev;
+                    else last = tmp->prev;
+                    break;
+                }
+                tmp=tmp->next;
             }
-            size--;
+        }else if(command == "deleteFirst"){
+            if(top->next){
+                auto node = top->next;
+                top->next = node->next;
+                if(node->next) node->next->prev = top;
+                else last = nullptr;
+            }
+        }else if(command == "deleteLast"){
+            if(last){
+                last->prev->next = nullptr;
+                last = last->prev;
+            }
         }
     }
-
-    printList();
-
+    print_nodes(top);
     return 0;
 }
