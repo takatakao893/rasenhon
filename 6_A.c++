@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 
+//分布数えあげソート
 void CountingSort(vector<int> A,vector<int> B, int k){
     vector<int> C(k+1,0); //各整数の出現回数を記録する整数列を用意して0に初期化する
     int n=A.size(); //Aの長さをnとする
